@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>わかくさ掲示板 - ホーム</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>📝 わかくさ掲示板</h1>
+  <p id="welcome"></p>
+  <button id="logoutBtn">ログアウト</button>
+
+  <div>
+    <input type="text" id="searchInput" placeholder="スレッド検索..." />
+    <button onclick="searchThreads()">検索</button>
+  </div>
+  <div style="margin-top: 16px;">
+    <button onclick="location.href='boards.html'">📂 板一覧ページを開く</button>
+  </div>
+
+  <script>
+    window.onload = () => {
+      const username = localStorage.getItem('username');
+      if (!username) {
+        location.href = 'login.html';
+      } else {
+        document.getElementById('welcome').textContent = `${username} さん、ようこそ！`;
+      }
+    };
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('isAdmin');
+      localStorage.removeItem('username');
+      alert('ログアウトしました');
+      location.href = 'login.html';
+    });
+
+    function searchThreads() {
+      const keyword = document.getElementById('searchInput').value.trim();
+      if (keyword) {
+        location.href = `threads.html?search=${encodeURIComponent(keyword)}`;
+      }
+    }
+  </script>
+</body>
+</html>
