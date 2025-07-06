@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>スレッド一覧 - わかくさ掲示板</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+</head>
+<body>
+  <h1 id="board-title">📂 スレッド一覧</h1>
+  <ul id="thread-list">読み込み中...</ul>
+
+  <hr />
+
+  <h2>＋ 新規スレッド作成</h2>
+  <form id="new-thread-form">
+    <input type="text" id="title" placeholder="スレッドタイトル" required />
+    <input type="text" id="name" placeholder="名前" required />
+    <input type="password" id="password" placeholder="削除用パスワード" required />
+    <button type="submit">作成</button>
+  </form>
+
+  <script>
+    const supabase = supabase.createClient(
+      'https://kdhurulrrehrkyrprufl.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtkaHVydWxycmVocmt5cnBydWZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3NzA5OTcsImV4cCI6MjA2NzM0Njk5N30.itwj_uK6GgvyhTvenoTHQSNM-ZAKhjkXI9ffqvpbWVI'
+    );
+
+    const params = new URLSearchParams(location.search);
+    const boardSlug = params.get('board');
+    let boardId = null;
+
+    async function loadBoardInfo() {
+      const { data } = await supabase
+        .from('boards')
+        .select('*')
+        .eq('slug', boardSlug)
+        .single();
+      if (!data) {
+        document.getElementById('board-title').textContent = '板が見つかりません';
+        return;
+      }
+      boardId = data.id;
+      document.getElementById('board-title').textContent = `📂 板：${data.name}`;
+      loadThreads();
+    }
+
+    async function loadThreads() {
+      const { data } = await supabase
+        .from('threads')
+        .select('*')
+        .eq('board_id', boardId)
+        .order('created_at', { ascending: false });
+      const list = document.getElementById('thread-list');
+      list.innerHTML = '';
+      if (!data.length) {
+        list.innerHTML = '<li>スレッドがありません</li>';
+        return;
+      }
+      data.forEach(thread => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = `thread.html?thread=${thread.id}`;
+        a.textContent = `▶ ${thread.title}`;
+        li.appendChild(a);
+        list.appendChild(li);
+      });
+    }
+
+    document.getElementById('new-thread-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const title = document.getElementById('title').value.trim();
+      const name = document.getElementById('name').value.trim();
+      const password = document.getElementById('password').value.trim();
+      if (!title || !name || !password || !boardId) return;
+      await supabase.from('threads').insert([{ board_id: boardId, title, created_by: name, delete_password: password }]);
+      location.reload();
+    });
+
+    loadBoardInfo();
+  </script>
+</body>
+</html>
