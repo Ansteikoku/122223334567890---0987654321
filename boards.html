@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>板一覧 - わかくさ掲示板</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+</head>
+<body>
+  <h1>📂 板一覧</h1>
+  <div id="board-list">読み込み中...</div>
+
+  <script>
+    const supabase = supabase.createClient(
+      'https://kdhurulrrehrkyrprufl.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtkaHVydWxycmVocmt5cnBydWZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3NzA5OTcsImV4cCI6MjA2NzM0Njk5N30.itwj_uK6GgvyhTvenoTHQSNM-ZAKhjkXI9ffqvpbWVI'
+    );
+
+    async function loadBoards() {
+      const { data: boards, error } = await supabase
+        .from('boards')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      const container = document.getElementById('board-list');
+      if (error) {
+        container.textContent = '板の読み込みに失敗しました';
+        return;
+      }
+      container.innerHTML = '';
+      boards.forEach(board => {
+        const div = document.createElement('div');
+        // 板スラッグを元にクラス付け（例：board-renraku）
+        div.className = `board-container board-${board.slug}`;
+        const a = document.createElement('a');
+        a.href = `threads.html?board=${board.slug}`;
+        a.textContent = `▶ ${board.name}`;
+        div.appendChild(a);
+        container.appendChild(div);
+      });
+    }
+    loadBoards();
+  </script>
+</body>
+</html>
