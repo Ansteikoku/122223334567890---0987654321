@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ログイン - わかくさ掲示板</title>
+</head>
+<body>
+  <h1>ログイン</h1>
+  <form id="login-form">
+    <input type="text" id="name" placeholder="名前（管理者は「管理者」と入力）" required /><br/>
+    <input type="password" id="password" placeholder="パスワード" required /><br/>
+    <button type="submit">ログイン</button>
+  </form>
+
+  <script>
+    const ADMIN_PASSWORD = 'wakakusanagisa';
+    const USER_PASSWORD = 'wakakusa';
+
+    document.getElementById('login-form').addEventListener('submit', e => {
+      e.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (name === '管理者') {
+        if (password === ADMIN_PASSWORD) {
+          localStorage.setItem('isAdmin', 'true');
+          localStorage.setItem('username', '管理者');
+          alert('管理者ログイン成功');
+          location.href = 'home.html';
+        } else {
+          alert('管理者パスワードが違います');
+        }
+      } else {
+        if (password === USER_PASSWORD) {
+          localStorage.setItem('isAdmin', 'false');
+          localStorage.setItem('username', name);
+          alert('ログインしました');
+          location.href = 'home.html';
+        } else {
+          alert('パスワードが違います（一般ユーザーは「wakakusa」）');
+        }
+      }
+    });
+  </script>
+</body>
+</html>
