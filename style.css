@@ -1,0 +1,86 @@
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #fff;
+  margin: 0;
+  padding: 1rem 2rem;
+  color: #333;
+}
+
+h1, h2 {
+  color: #0055aa;
+}
+
+a {
+  color: #0055aa;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+input[type="text"], input[type="password"], textarea {
+  padding: 0.4rem;
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+button {
+  padding: 0.4rem 1rem;
+  background-color: #0055aa;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #004080;
+}
+
+.admin-name {
+  color: orange;
+  font-weight: bold;
+}
+
+.comment {
+  border-bottom: 1px solid #ccc;
+  padding: 8px 0;
+}
+
+.comment .anchor {
+  color: blue;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* 板共通のスタイル */
+.board-container {
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  color: #222;
+  font-weight: bold;
+}
+
+/* 板ごとの背景色 */
+.board-renraku {
+  background-color: #e0f7fa; /* 水色 */
+}
+
+.board-kyouka {
+  background-color: #fff9c4; /* 薄い黄色 */
+}
+
+.board-zatsudan {
+  background-color: #e1bee7; /* 薄い紫 */
+}
+
+.board-rule {
+  background-color: #ffccbc; /* 薄いオレンジ */
+  color: #660000;
+}
