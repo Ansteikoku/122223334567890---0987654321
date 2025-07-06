@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>スレッド表示 - わかくさ掲示板</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1 id="thread-title">スレッドタイトル</h1>
+  <div id="comments">読み込み中...</div>
+
+  <hr />
+
+  <h2>コメント投稿</h2>
+  <form id="comment-form">
+    <input type="text" id="name" placeholder="名前" required /><br/>
+    <textarea id="content" placeholder="コメント内容" required></textarea><br/>
+    <input type="file" id="image" accept="image/*" /><br/>
+    <button type="submit">投稿</button>
+  </form>
+
+  <button id="logoutBtn">ログアウト</button>
+
+  <script src="supabase.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const threadId = params.get("thread");
+    const isAdmin = localStorage.getItem("isAdmin") === "true";
+
+    async function loadThread() {
+      const { data } = await supabase.from("threads").select("*").eq("id", threadId).single();
+      if (data) document.getElementById("thread-title").textContent = data.title;
+      loadComments();
+    }
+
+    async function loadComments() {
+      const { data } = await supabase.from("comments").select("*").eq("thread_id", threadId).order("created_at");
+      const container = document.getElementById("comments");
+      container.innerHTML = "";
+      data.forEach((c, i) => {
+        const div = document.createElement("div");
+        div.id = `comment-${i + 1}`;
+        div.className = "comment";
+        const nameHTML = c.name === "管理者"
+          ? '<span class="admin-name">管理者</span>'
+          : c.name;
+        div.innerHTML = `
+          <strong>${nameHTML}</strong><br/>
+          ${c.content.replace(/&gt;&gt;(\\d+)/g, m =>
+            `<a class="anchor" href="#comment-${m.replace('>>','')}">${m}</a>`
+          )}<br/>
+          ${c.image_url ? `<img src="${c.image_url}" style="max-width:200px;">` : ''}
+          ${isAdmin ? `<br/><button onclick="deleteComment('${c.id}')">削除</button>` : ''}
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    async function deleteComment(id) {
+      if (!confirm("本当に削除しますか？")) return;
+      await supabase.from("comments").delete().eq("id", id);
+      loadComments();
+    }
+
+    async function uploadImage(file) {
+      const filename = Date.now() + "_" + file.name;
+      const { error } = await supabase.storage.from("images").upload(filename, file);
+      if (error) return null;
+      const { publicURL } = supabase.storage.from("images").getPublicUrl(filename);
+      return publicURL;
+    }
+
+    document.getElementById("comment-form").addEventListener("submit", async e => {
+      e.preventDefault();
+      const name = document.getElementById("name").value.trim();
+      const content = document.getElementById("content").value.trim();
+      const imageFile = document.getElementById("image").files[0];
+      let imageUrl = null;
+      if (imageFile) {
+        imageUrl = await uploadImage(imageFile);
+      }
+      await supabase.from("comments").insert([{ thread_id: threadId, name, content, image_url: imageUrl }]);
+      document.getElementById("comment-form").reset();
+      loadComments();
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      localStorage.removeItem("isAdmin");
+      localStorage.removeItem("username");
+      alert("ログアウトしました");
+      location.href = "login.html";
+    });
+
+    loadThread();
+  </script>
+</body>
+</html>
